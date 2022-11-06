@@ -1,6 +1,3 @@
-from audioop import bias
-from turtle import shape
-from cv2 import log
 import numpy as np
 from neural_network import NeuralNetwork
 
