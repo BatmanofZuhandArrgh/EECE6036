@@ -1,38 +1,66 @@
 import numpy as np
-from neural_network import NeuralNetwork
+from network.neural_network import NeuralNetwork
+from utils.math_utils import *
+np.set_printoptions(suppress=True)
 
-def sigmoid(x):                                        
-    return 1 / (1 + np.exp(-x))
 
-def sigmoid_prime(x) :
-    return sigmoid(x)*(1-sigmoid(x))
+class FeedForwardNN(NeuralNetwork):
+    def __init__(self, weight_path=None, layer_neurons=[200], lr=0.01, input_size=784, num_class=10, activation_function=None, 
+        output_activation = 'sigmoid',
+        H = 0.75, L =0.25
+        ):
+        super().__init__(weight_path, layer_neurons, lr, input_size, num_class, activation_function, output_activation)
+        self.H, self.L = H,L
+        self.input = []
+        self.layer_types = []
 
-def binary_cross_entropy(y_truth, y_pred):
-    #For single values
-    y_pred = np.clip(y_pred, 1e-7, 1- 1e-7)
-    return y_truth* np.log(y_pred) + (1 - y_truth) * np.log(1-y_pred)
+    def thresholding(self, x):
+        new_x = []
+        for e in x[0]:
+            if e >= self.H: new_x.append(1)
+            elif e <= self.L: new_x.append(0)
+            else: new_x.append(e)
+        return np.array(new_x)
 
-class PerceptronNetwork(NeuralNetwork):
-    def __init__(self, weight_path=None, num_neuron=784, lr=0.01) -> None:
-        super().__init__(weight_path, num_neuron, lr)
+    def forward(self, x):
+        for i in range(len(self.weights)):
+            self.input.append(x)
+            self.layer_types.append('fc')
+            x = np.dot(x, self.weights[i]) + self.biases[i]
+            # print(x, x.shape)
+            self.input.append(x)
+            if i == (len(self.weights) - 1):
+                self.layer_types.append('output_act')
+                x = self.out_act(x)
+                # print(x, x.shape)
+                x = self.thresholding(x) 
+            else:
+                self.layer_types.append('hidden_act')
+                x = self.f(x)
 
-        self.bias = np.random.uniform(low=0, high=0.5, size= (1,))
-        self.f = lambda x : 1 if x > 0 else 0
+            # print(x, x.shape)
+        return x
 
-    def forward(self, input):
-        output = sum(input * self.weights) + self.bias
-        return self.f(output)    
+    def backward(self, loss):
+        layer_output_error = loss
+        weight_index = -1
+        for i in range(-1, -len(self.layer_types) -1, -1):
+            print(i, self.layer_types[i])
+            layer_output_error = self.layer_backprop(
+                layer_input=self.input[i],
+                layer_output_error=layer_output_error,
+                weight_index=weight_index,
+                layer_type=self.layer_types[i]
+            )
+            if self.layer_types[i] == 'fc':
+                weight_index -= 1
 
-    def update(self, input, output, ground_truth = None):
-        self.weights += self.lr * (ground_truth - output) * input
-        self.bias    += self.lr * (ground_truth - output)
-
-    # def backprop_linear(self, input, output_error):
-    #     input_error = sum(output_error * self.weights)
-    #     weights_gradient = sum(input * output_error)
-    #     bias_gradient = output_error
-
-    #     self.weights -= weights_gradient * self.lr
-    #     self.bias    -= bias_gradient * self.lr 
-
-    #     return input_error        
+        self.input = []
+        self.layer_types = []
+        
+      
+if __name__ == '__main__':
+    classifier = FeedForwardNN(activation_function='tanh')
+    x = np.random.uniform(low=0, high=1,size=(784,))#* 255
+    classifier.forward(x)
+    classifier.backward(np.array([0.58652073, 0.40298107, 1., 0.38419388,0.25782405, 0.54964009,0.,0.73728738, 0.73501868, 0.54607665]))
