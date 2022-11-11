@@ -95,6 +95,11 @@ if __name__ == "__main__":
         test_imgs.extend(str_data[400:])
         test_labels.extend([str(num) for x in range(100)])
 
+        with open(f'./dataset/{str(num)}_train_400imgs.txt', 'w') as f:
+            f.write(''.join(str_data[:400]))
+        with open(f'./dataset/{str(num)}_test_100imgs.txt', 'w') as f:
+            f.write(''.join(str_data[400:]))
+
     # with open(f'./dataset/train_4000imgs.txt', 'w') as f:
     #     f.write(''.join(train_imgs))
     # with open(f'./dataset/train_4000labs.txt', 'w') as f:
@@ -105,5 +110,8 @@ if __name__ == "__main__":
     # with open(f'./dataset/test_1000labs.txt', 'w') as f:
     #     f.write('\n'.join(test_labels))
 
-    testing_sample = read_img_from_txt('./dataset/test_1000imgs.txt')
-    print(testing_sample.shape)
+    # testing_sample = read_img_from_txt('../dataset/test_1000imgs.txt')
+    # sample = (testing_sample[108, :] *255.).reshape(28,28)
+    # print(sample,sample.shape)
+    # plt.imshow(sample.T)
+    # plt.show()

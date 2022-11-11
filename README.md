@@ -44,3 +44,27 @@ pip install -r Assignment2/Problem1.py
 '''
 pip install -r Assignment2/Problem2.py
 '''
+
+Assigment 3:
+1. To install
+'''
+cd EECE6036
+pip install -r Assignment1/requirements.txt
+'''
+
+2. Run python Assignment3/parse_data_file.py to process and output data files dataset/train_4000img.txt and dataset/train_4000lab.txt (test and chal as well)
+
+3. To run the problem 1, edit the hyper-params in Assignment3/train.py 
+'''
+cd Assignment3
+python -m train_prob1
+'''
+
+4. To run the problem 2.1 and 2.2, edit the hyper-params in 
+'''
+cd Assignment3
+#To train prob1 classifier
+python -m train_prob1
+#To train prob2 autoencoder
+python -m train_prob2
+'''

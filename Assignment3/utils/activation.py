@@ -40,12 +40,4 @@ def get_act(act_type):
         raise ValueError
     return f, f_prime
 
-def binary_cross_entropy(y_truth, y_pred):
-    #For single values
-    y_pred = np.clip(y_pred, 1e-7, 1- 1e-7)
-    return y_truth* np.log(y_pred) + (1 - y_truth) * np.log(1-y_pred)
 
-if __name__ == '__main__':
-    y_truth = np.array([[0,0,1,0,0],[0,0,0,0,0]])
-    y_pred  = np.array([[0.58652073, 0.40298107, 1., 0.38419388,0.25782405], [0.54964009,0.,0.73728738, 0.73501868, 0.54607665]])
-    print(binary_cross_entropy(y_truth, y_pred))
