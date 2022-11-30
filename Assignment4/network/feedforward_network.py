@@ -11,8 +11,15 @@ class FeedForwardNN(NeuralNetwork):
         H = 0.75, L =0.25,
         momentum = 0.5,
         loss_function = 'mse',
+        load_first_weight = False,
+        freeze_first_layer = False,
         ):
-        super().__init__(weight_path, layer_neurons, lr, input_size, output_size, activation_function, output_activation, momentum=momentum, loss_function=loss_function)
+        super().__init__(weight_path, layer_neurons, lr, input_size,\
+             output_size, activation_function, output_activation,\
+                 momentum=momentum, loss_function=loss_function, \
+                    load_first_weight=load_first_weight,\
+                        freeze_first_layer=freeze_first_layer
+                        )
         self.H, self.L = H,L
         self.input = []
         self.layer_types = []
@@ -38,6 +45,8 @@ class FeedForwardNN(NeuralNetwork):
         return np.array(new_x)
 
     def forward(self, x):
+        threshold_x = None
+
         for i in range(len(self.weights)):
             self.input.append(x)  
             # print(x.shape, self.weights[i].shape, self.biases[i].shape)
@@ -73,9 +82,19 @@ class FeedForwardNN(NeuralNetwork):
         self.input = []
 
 if __name__ == '__main__':
-    classifier = FeedForwardNN(activation_function='tanh', input_size=10, layer_neurons=[5], output_size=2)
-    x = np.random.uniform(low=0, high=1,size=(2,10,))#* 255
-    output, threshold_output = classifier.forward(x)
-    loss_prime =  np.array([[0.58652073, 0.40298107, 1., 0.38419388,0.25782405, 0.54964009,0.,0.73728738, 0.73501868, 0.54607665]])
-    loss_prime =  np.array([[0.58652073, 0.40298107]])
-    classifier.backward(loss_prime)
+    # classifier = FeedForwardNN(activation_function='tanh', input_size=10, layer_neurons=[5], output_size=2, load_first_weight=True)
+    # x = np.random.uniform(low=0, high=1,size=(2,10,))#* 255
+    # output, threshold_output = classifier.forward(x)
+    # loss_prime =  np.array([[0.58652073, 0.40298107, 1., 0.38419388,0.25782405, 0.54964009,0.,0.73728738, 0.73501868, 0.54607665]])
+    # loss_prime =  np.array([[0.58652073, 0.40298107]])
+    # classifier.backward(loss_prime)
+
+    classifier = FeedForwardNN(activation_function='tanh', input_size=784, \
+        layer_neurons=[200], output_size=10, \
+        load_first_weight=True, \
+            weight_path='./output/prob1/exp_A3/weights')
+    # x = np.random.uniform(low=0, high=1,size=(2,10,))#* 255
+    # output, threshold_output = classifier.forward(x)
+    # loss_prime =  np.array([[0.58652073, 0.40298107, 1., 0.38419388,0.25782405, 0.54964009,0.,0.73728738, 0.73501868, 0.54607665]])
+    # loss_prime =  np.array([[0.58652073, 0.40298107]])
+    # classifier.backward(loss_prime)

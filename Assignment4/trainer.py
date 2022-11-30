@@ -54,9 +54,8 @@ class Trainer:
 
         self.train_lab = self.train_lab[indices]
 
-    def train(self, num_epochs = 200, batch_size =1, early_stopping = 2, min_error_diff = 0.003):
+    def train(self, num_epochs = 200, batch_size =1, early_stopping = 5, min_error_diff = 0.003):
         test_errors = []
-        save_epoch = False
         for epoch in tqdm(range(num_epochs)):
             self.shuffle_trainset()
             loss = 0
@@ -167,7 +166,7 @@ class Trainer:
         self.network.clear_input()
         return loss
 
-    def test(self, img_path = None, lab_path = None, dataset = 'test', batch_size = 1000):
+    def test(self, img_path = None, lab_path = None, dataset = 'test', batch_size = 1):
         if dataset == 'test':
             test_img = self.test_img
             test_lab = self.test_lab
@@ -175,17 +174,20 @@ class Trainer:
             test_img = self.train_img
             test_lab = self.train_lab  
         elif dataset == 'new':
-            test_img = read_img_from_txt(img_path) 
-            test_lab = read_lab_from_txt(lab_path)
+            test_img = read_img_from_txt(img_path)
+            if lab_path is not None: 
+                test_lab = read_lab_from_txt(lab_path)
+            else: 
+                test_lab = np.array([int(os.path.basename(img_path).split('_')[0]) for x in range(100)])
         else:
             raise ValueError         
-            
+
         test_output = []
         for img_idx in range(int(test_img.shape[0]//batch_size)):
             cur_input = test_img[img_idx*batch_size:(img_idx+1)*batch_size, :]
             cur_output, cur_threshold_output = self.network.forward(cur_input)
             test_output.extend(list(np.argmax(cur_output, axis=1)))
-
+        
         error_fraction = get_error_fraction(list(test_lab), test_output)
         self.network.clear_input()
         return test_output, error_fraction
@@ -226,8 +228,7 @@ class Trainer:
         self.network.save_weight(save_path)
 
     def load_weights(self, path = None):
-        load_path = f'{self.output_dir}/weights' if path is None else path
-        print(load_path)
+        load_path = f'{self.output_dir}' if path is None else path
         self.network.load_weight(load_path)
 
 if __name__ == "__main__":

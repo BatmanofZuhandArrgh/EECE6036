@@ -32,19 +32,19 @@ if __name__ == "__main__":
             'hidden_neuron': 200,
             'lr': 0.01,
             'momentum': 0.5,
-            'num_epochs': 600
+            'num_epochs': 1100
         },
         'exp1':{
             'hidden_neuron': 100,
             'lr': 0.01,
             'momentum': 0.5,
-            'num_epochs': 800
+            'num_epochs': 1200
         },
         'exp2':{
             'hidden_neuron': 200,
             'lr': 0.0025,
             'momentum': 0.5,
-            'num_epochs': 810
+            'num_epochs': 2000
         },
     }
 

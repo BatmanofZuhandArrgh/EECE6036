@@ -9,6 +9,8 @@ class NeuralNetwork:
      output_activation = None,
      momentum = 0.5,
      loss_function = None,
+     load_first_weight = False,
+     freeze_first_layer = False
      ) -> None:
         '''
         Input:
@@ -34,23 +36,29 @@ class NeuralNetwork:
                 cur_weight = np.random.rand(layer_input_size, layer_output_size) - 0.5
                 # np.random.seed(0) 
                 cur_bias   = np.random.rand(1, layer_output_size) - 0.5
+                self.weights.append(cur_weight)
+                self.biases.append(cur_bias)   
+
             else:
-                print('load weight path')
+                print('Loading full weight')
                 self.load_weight(weight_path)
 
-            self.weights.append(cur_weight)
-            self.biases.append(cur_bias)
+        self.act_func = activation_function
+        self.out_act_func = output_activation
+        self.loss_func = loss_function
 
-            self.act_func = activation_function
-            self.out_act_func = output_activation
-            self.loss_func = loss_function
+        self.f, self.f_prime = get_act(self.act_func)
+        self.out_act, self.out_act_prime = get_act(output_activation)
+        self.loss, self.loss_prime = get_loss(self.loss_func)
 
-            self.f, self.f_prime = get_act(self.act_func)
-            self.out_act, self.out_act_prime = get_act(output_activation)
-            self.loss, self.loss_prime = get_loss(self.loss_func)
+        if load_first_weight:
+            self.load_first_weight()
+
+        self.freeze_first_layer = freeze_first_layer
 
         for index, weight in enumerate(self.weights):
             print(f'layer: {index}')
+            # print(self.weights[index][0][:10])
             print(weight.shape)
         
         self.lr = lr
@@ -81,16 +89,21 @@ class NeuralNetwork:
             # print('bias', bias_error, bias_error.shape)
 
             self.weight_gradients[weight_index] = self.lr * weight_error + self.momentum * self.weight_gradients[weight_index] 
-    
-            self.weights[weight_index] -= self.weight_gradients[weight_index]
-            # print(self.biases[weight_index].shape, bias_error.shape)
-            self.biases[weight_index]  -= self.lr * bias_error
+
+            if weight_index == -2 and self.freeze_first_layer:
+                pass
+            else:
+                self.weights[weight_index] -= self.weight_gradients[weight_index]
+                # print(self.biases[weight_index].shape, bias_error.shape)
+                self.biases[weight_index]  -= self.lr * bias_error
 
         elif layer_type == 'hidden_act':
             layer_input_error = self.f_prime(layer_input)* layer_output_error
         elif layer_type == 'output_act':
             layer_input_error = self.out_act_prime(layer_input)* layer_output_error
-
+        
+        # print('layer0', self.weights[-2][0][:10])
+        # print('layer1', self.weights[-1][0][:10])
         return layer_input_error
     
     def save_weight(self, save_path):
@@ -109,5 +122,15 @@ class NeuralNetwork:
             self.biases.append((np.load(bias_files[i])))
             self.weights.append((np.load(weight_files[i])))
 
+    def load_first_weight(self):
+        print('LOADING FIRST WEIGHT')
+        for i in range(1, len(self.weights)): 
+            layer_input_size = self.layer_neurons[i]
+            layer_output_size= self.layer_neurons[i+1]
+
+            self.weights[i] = np.random.rand(layer_input_size, layer_output_size) - 0.5
+            self.biases[i]   = np.random.rand(1, layer_output_size) - 0.5
+
+        
 if __name__ == "__main__":
-    sample_network = NeuralNetwork(layer_neurons=[200])
+    sample_network = NeuralNetwork(layer_neurons=[200], load_first_weight=True)
